@@ -93,12 +93,12 @@ Docker is a platform that allows you to run applications in isolated environment
 2.  **Run the docker container:**
     Open a terminal and run the following command. If you are not familiar with the terminal, it is a good idea to do a freshen-up course on bash and terminal commands.
     ```bash
-    docker run -v ros2_ws:/home/jovyan/ros2_ws --rm -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
+    docker run --rm -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
     ```
     This command will download the Docker image and start a container, that deletes on shutdown (`--rm`). The container runs a Jupyter Lab instance with a VNC server, giving you access to a full desktop environment.
     You can also run the container in detached mode by adding the `-d` flag:
     ```bash
-    docker run -v ros2_ws:/home/jovyan/ros2_ws -d -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
+    docker run -d -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
     ```
     and use stop/start commands to manage the container. You can find more information about managing Docker containers in the [Docker documentation](https://docs.docker.com/get-started/overview/).
 
@@ -158,12 +158,12 @@ If your computer is not powerful enough to run the simulation natively or via Do
 -   Connect to your VM using SSH. You can click the **SSH** button next to your instance in the GCP Console.
 -   In the SSH terminal, run the following command to start the Docker container (same instruction as in Option 2):
     ```bash
-    docker run -v ros2_ws:/home/jovyan/ros2_ws --rm -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
+    docker run --rm -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
     ```
     This command will download the Docker image and start a container, that deletes on shutdown (`--rm`). The container runs a Jupyter Lab instance with a VNC server, giving you access to a full desktop environment.
     You can also run the container in detached mode by adding the `-d` flag:
     ```bash
-    docker run -v ros2_ws:/home/jovyan/ros2_ws -d -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
+    docker run -d -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
     ```
     and use stop/start commands to manage the container. You can find more information about managing Docker containers in the [Docker documentation](https://docs.docker.com/get-started/overview/).
 
