@@ -198,7 +198,7 @@ After setting up your environment, run a test program to visualize the Franka ro
     ```
 4.  Run the launch file:
     ```bash
-    ros2 launch franka_gazebo visualize_franka.launch.py
+    ros2 launch franka_gazebo_bringup visualize_franka_robot.launch.py
     ```
 You should see two windows open: RViz (visualizer) and Gazebo (simulator).
 
