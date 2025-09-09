@@ -93,6 +93,17 @@ RUN echo "Installing TurboVNC"; \
     ; \
     rm -rf /var/lib/apt/lists/*;
 
+# Fix permissions
+USER root
+RUN chown -R ${NB_UID}:${NB_GID} ${HOME}
+
+# --- Activate Conda Environment --- #
+USER ${NB_USER}
+RUN source /opt/conda/etc/profile.d/conda.sh && \
+    conda create -n ros2 python=3.12 -y && \
+    conda activate ros2 && \
+    echo "conda activate ros2" >> /home/${NB_USER}/.bashrc
+
 # Install VNC jupyterlab extension
 USER ${NB_USER}
 RUN mamba install -y websockify
@@ -103,10 +114,6 @@ USER ${NB_USER}
 RUN mkdir -p /home/${NB_USER}/.vnc && \
     /opt/TurboVNC/bin/vncpasswd -f <<< "vnc123" > /home/${NB_USER}/.vnc/passwd && \
     chmod 600 /home/${NB_USER}/.vnc/passwd
-
-# Fix permissions
-USER root
-RUN chown -R ${NB_UID}:${NB_GID} ${HOME}
 
 # --- Install python packages --- #
 USER ${NB_USER}
