@@ -11,11 +11,11 @@ The Robot Operating System (ROS) is a flexible framework for writing robot softw
 Gazebo is a powerful 3D robotics simulator that allows you to test and validate your robot's software in a virtual environment before deploying it on a physical robot. It provides realistic physics simulation, a variety of sensors, and a graphical interface to visualize your robot and its environment.
 
 ### Why ROS 2 Jazzy and Gazebo Harmonic?
-ROS 2 and Gazebo releases are tightly coupled with specific versions of Ubuntu. We will be using ROS 2 Jazzy Jellyfish and Gazebo Harmonic, which are the recommended versions for Ubuntu 24.04. This ensures compatibility and access to the latest features and bug fixes.
+ROS 2 and Gazebo releases are tightly coupled with specific versions of Ubuntu. We will be using ROS 2 Jazzy Jellyfish and Gazebo Harmonic, which are the recommended versions for Ubuntu 24.04. This ensures compatibility with Ubuntu 24.04 and access to the latest features and bug fixes.
 
 ## Option 1: Native Ubuntu 24.04 Installation
 
-This is the recommended approach if you have a computer running Ubuntu 24.04 with sufficient resources (recommended: 4-core/8-thread CPU, 16GB RAM). The current set up is only supported for bash shell.
+This is the recommended approach if you have a computer running Ubuntu 24.04 with sufficient resources (recommended: 4-core/8-thread CPU, 16GB RAM). The current setup is only supported for the bash shell.
 
 1.  **Install ROS 2:**
     Follow the official ROS 2 Jazzy installation guide:
@@ -35,7 +35,7 @@ This is the recommended approach if you have a computer running Ubuntu 24.04 wit
     sudo add-apt-repository universe
     sudo apt update && sudo apt install curl -y
     export ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F\" '{print $4}')
-    curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo $VERSION_CODENAME)_all.deb" # If using Ubuntu derivates use $UBUNTU_CODENAME
+    curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo $VERSION_CODENAME)_all.deb" # If using Ubuntu derivatives use $UBUNTU_CODENAME
     sudo dpkg -i /tmp/ros2-apt-source.deb
 
     # 3. Install ROS 2 packages
@@ -53,7 +53,7 @@ This is the recommended approach if you have a computer running Ubuntu 24.04 wit
     sudo apt-get install ros-jazzy-ros-gz
     ```
     **Make sure you have sourced the ros2 setup script following the previous instruction.**
-    You can also install the standalone binary version of Gazebo if preferred, see: [Official Gazebo with ROS installation guide](https://gazebosim.org/docs/latest/ros_installation/).
+    You can also install the standalone binary version of Gazebo if preferred; see: [Official Gazebo with ROS installation guide](https://gazebosim.org/docs/latest/ros_installation/).
 
 3.  **Install Franka ROS2 Workspace:**
     To install the Franka workspace, follow the installation instructions from the `franka_ros2` repository. The setup script in Option 3 contains the necessary commands.
@@ -79,7 +79,7 @@ This is the recommended approach if you have a computer running Ubuntu 24.04 wit
 
 ## Option 2: Docker for macOS, Windows Subsystem for Linux (WSL), and other Linux distributions
 
-If you are using macOS, WSL, or a non-Ubuntu Linux distribution, you can use a pre-configured Docker container. This method requires a powerful workstation, otherwise the simulation will be laggy.
+If you are using macOS, WSL, or a non-Ubuntu Linux distribution, you can use a pre-configured Docker container. This method requires a powerful workstation; otherwise the simulation will be laggy.
 
 ### What is Docker?
 Docker is a platform that allows you to run applications in isolated environments called containers. We use it to provide a consistent and pre-configured development environment with all the necessary tools, without affecting your own computer's system. For AI and Computer Science students, learning to use Docker is a very valuable skill.
@@ -90,33 +90,41 @@ Docker is a platform that allows you to run applications in isolated environment
     -   **Windows:** [https://docs.docker.com/desktop/setup/install/windows-install/](https://docs.docker.com/desktop/setup/install/windows-install/)
     -   **Linux:** [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/)
 
-2.  **Run the docker container:**
-    Open a terminal and run the following command. If you are not familiar with the terminal, it is a good idea to do a freshen-up course on bash and terminal commands.
+2. **Clean up old images (if any):**
+   If you have previously run the Docker container, it is recommended to remove any existing images of `storkslab/ros2-jazzy-franka` to avoid conflicts with previous versions. You can do this by executing the following command in your terminal:
+   ```bash
+    docker rmi storkslab/ros2-jazzy-franka --force
+    # or
+    docker image pull storkslab/ros2-jazzy-franka:latest
+   ```
+
+3.  **Run the docker container:**
+    Open a terminal and run the following command. If you are not familiar with the terminal, it is a good idea to refresh your bash/terminal skills.
     ```bash
     docker run --rm -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
     ```
-    This command will download the Docker image and start a container, that deletes on shutdown (`--rm`). The container runs a Jupyter Lab instance with a VNC server, giving you access to a full desktop environment.
-    You can also run the container in detached mode by adding the `-d` flag:
+    This command will download the Docker image and start a container that removes itself on shutdown (`--rm`). Any modifications to the container's filesystem outside of the persisted volume will be lost when the container is removed. The container runs a Jupyter Lab instance with a VNC server, giving you access to a full desktop environment.
+    
+    To keep your progress, you can also run the container in detached mode by adding the `-d` flag:
     ```bash
     docker run -d -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
     ```
     and use stop/start commands to manage the container. You can find more information about managing Docker containers in the [Docker documentation](https://docs.docker.com/get-started/overview/).
 
-    Note: If you close the terminal, the container will stop. If you want to keep it running in the background, use the `-d` flag as shown above.
-    File persistence: The `-v ros2_ws:/home/jovyan/ros2_ws` option mounts a Docker volume named `ros2_ws` to the container's workspace directory. This means that any files you create or modify in `/home/jovyan/ros2_ws` inside the container will be saved to the `ros2_ws` volume on your host machine, and will persist even after the container is stopped or removed. Best practice is to keep all your work inside this directory, or another attached volume, and to delete the container after use (`--rm`). Any modifications to the container's filesystem outside of this volume will be lost when the container is removed.
-
-3.  **Access the environment:**
-    -   Open your web browser and navigate to `http://localhost:8888/lab`. It will ask for a password, which is `robotics2025` by default.
+4.  **Access the environment:**
+    -   Open your web browser and navigate to `https://localhost:8888/lab`. It will ask for a password, which is `robotics2025` by default.
+    -   Make sure you use `https` if the server was configured with TLS; otherwise use the appropriate protocol shown by the container logs.
+    -   You may see a security warning. Click "Advanced" and "Proceed anyway" if you trust the connection.
     -   The Jupyter Lab interface will open. On the launcher, click on the "Desktop" icon.
     -   A new browser tab will open with a full Linux desktop environment. Congratulations, you are in!
 
 ## Option 3: Google Cloud Platform (GCP) Virtual Machine
 
-If your computer is not powerful enough to run the simulation natively or via Docker, you can use a virtual machine on GCP, and run dockre there.
+If your computer is not powerful enough to run the simulation natively or via Docker, you can use a virtual machine on GCP and run Docker there.
 
 ### Step 1: Create a GCP Account & Project
 -   Sign up for a GCP account at [https://cloud.google.com/](https://cloud.google.com/).
--   If you have a `@student.vu.nl` email, you are eligible for $300 in free credits.
+-   If you have a `@student.vu.nl` email, you may be eligible for $300 in free credits.
 -   Create a new project for this course, and enable billing.
 
 ### Step 2: Create a Virtual Machine
@@ -140,7 +148,7 @@ If your computer is not powerful enough to run the simulation natively or via Do
         -   Check **Allow HTTP traffic** and **Allow HTTPS traffic**.
         -   **Network tags:**
             -   Add the tag `jupyter-lab`.
--   Click **Create**. The VM will be deployed in about a minute. Note its **External IP**.
+-   Click **Create**. The VM will be deployed in about a minute. Note its external IP.
 
 ### Step 3: Configure Firewall Rule
 -   In the GCP console, open the **Cloud Shell** (top-right `>_` icon).
@@ -156,19 +164,26 @@ If your computer is not powerful enough to run the simulation natively or via Do
 
 ### Step 4: Connect to the VM and Run Docker Container
 -   Connect to your VM using SSH. You can click the **SSH** button next to your instance in the GCP Console.
+
+-   **Clean up old images (if any):**
+    If you have previously run the Docker container, it is recommended to remove any existing images of `storkslab/ros2-jazzy-franka` to avoid conflicts with previous versions. You can do this by executing the following command in your terminal:
+    ```bash
+    docker rmi storkslab/ros2-jazzy-franka --force
+    # or
+    docker image pull storkslab/ros2-jazzy-franka:latest
+    ```
 -   In the SSH terminal, run the following command to start the Docker container (same instruction as in Option 2):
     ```bash
     docker run --rm -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
     ```
-    This command will download the Docker image and start a container, that deletes on shutdown (`--rm`). The container runs a Jupyter Lab instance with a VNC server, giving you access to a full desktop environment.
-    You can also run the container in detached mode by adding the `-d` flag:
+    This command will download the Docker image and start a container that removes itself on shutdown (`--rm`). Any modifications to the container's filesystem outside of the persisted volume will be lost when the container is removed. The container runs a Jupyter Lab instance with a VNC server, giving you access to a full desktop environment.
+    
+    To keep your progress, you can also run the container in detached mode by adding the `-d` flag:
     ```bash
     docker run -d -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
     ```
     and use stop/start commands to manage the container. You can find more information about managing Docker containers in the [Docker documentation](https://docs.docker.com/get-started/overview/).
 
-    Note: If you close the terminal, the container will stop. If you want to keep it running in the background, use the `-d` flag as shown above.
-    File persistence: The `-v ros2_ws:/home/jovyan/ros2_ws` option mounts a Docker volume named `ros2_ws` to the container's workspace directory. This means that any files you create or modify in `/home/jovyan/ros2_ws` inside the container will be saved to the `ros2_ws` volume on your host machine, and will persist even after the container is stopped or removed. Best practice is to keep all your work inside this directory, or another attached volume, and to delete the container after use (`--rm`). Any modifications to the container's filesystem outside of this volume will be lost when the container is removed.
 
 ### Step 5: Access the Environment
 -   In your local web browser, navigate to `https://<your_vm_external_ip>:8888/lab`.
@@ -200,15 +215,21 @@ After setting up your environment, run a test program to visualize the Franka ro
     ```bash
     ros2 launch franka_gazebo_bringup visualize_franka_robot.launch.py
     ```
-You should see two windows open: RViz (visualizer) and Gazebo (simulator).
+You should see two windows open: RViz (visualizer) and Gazebo (simulator). Note that Gazebo may take a while to load the first time, and it could be obscured by other windows. Please take a screenshot of the result for your submission.
+
+You can close all windows and stop the program by pressing `Ctrl+C` in the terminal.
 
 ---
 
-## Part 2: ROS 2 Workspace
+## Part 2: ROS 2 Publisher-Subscriber Tutorial (Python)
 
-A ROS2 workspace is somewhat similar to a virtual envrinoment, it is a directory where you could work on the development of individual project, build, modify and install ROS 2 packages locally. One could have multiple workspaces but it could only be sourced one at a time to make its packages available in your terminal environment. The building of different packages and their dependencies is handled by the build tool `colcon`.
+This tutorial, adapted from the official ROS 2 documentation, guides you through creating a simple publisher and subscriber showing the decoupled communication between a publisher and subscriber via topics managed by the ROS 2 middleware. 
 
-### The workspace structure
+### About ROS 2 Workspaces (don't run this)
+
+A ROS2 workspace is somewhat similar to a virtual environment; it is a directory where you can work on the development of individual project packages, build, modify and install ROS 2 packages locally. You can have multiple workspaces but only one can be sourced at a time to make its packages available in your terminal environment. The building of different packages and their dependencies is handled by the build tool `colcon`.
+
+#### The workspace structure
 
 After being built, a standard ROS 2 workspace normally has the following directory
 ```bash
@@ -221,21 +242,19 @@ your_workspace/            # The workspace root
     └── your_package_2/
     └── ...               
 ```
-Notice that all your source codes for your packages are contained in `src/` only, here you could either create new packages (see Part 3 for details) or clone existing packages from git but one shall always build directory from the workspace root using colcon.
+Notice that all your source code for your packages is contained in `src/` only; here you could either create new packages (see Part 3 for details) or clone existing packages from git but you should always build from the workspace root using colcon.
 
-### Sourcing
+#### Sourcing
 
 Previously in the native installation guide, we have sourced the setup file directly into .bashrc so that you do not have to source it again every time a new terminal is being opened. However, one could overlay a custom workspace on top of the core ROS 2 environment by running
 ```bash
 source ~/your_workspace/install/setup.bash
 ```
-Now your currrent terminal could look for packages first in the `~/your_workspace/install/` directory and would only fall back to the core setup if certain package could not be found from the custom directory. Therefore make sure you source the custom setup file in every new terminal where you would like to open you packages but **NEVER** source multiple setup files directly into .bashrc file. 
-
-## Part 3: ROS 2 Publisher-Subscriber Tutorial (Python)
-
-This tutorial, adapted from the official ROS 2 documentation, guides you through creating a simple publisher and subscriber showing the decoupled communication between a publisher and subscriber via topics managed by the ROS 2 middleware. 
+Now your current terminal can look for packages first in the `~/your_workspace/install/` directory and will only fall back to the core setup if a certain package could not be found in the overlay. Therefore make sure you source the custom setup file in every new terminal where you would like to use your packages but **NEVER** source multiple setup files directly into .bashrc.
 
 ### 1. Create a Package
+
+Note: you can use either JupyterLab terminal or the desktop terminal to do this part. It is easier to use JupyterLab to copy-paste the commands.
 
 Open a terminal and navigate to the `src` directory of a new workspace:
 ```bash
@@ -336,15 +355,22 @@ Save and exit `nano`.
 Navigate back to the package root (`~/ros2_ws/src/py_pubsub`).
 
 #### a. Edit `package.xml`
-Open `package.xml` and add the following lines inside the `<package>` tag to declare dependencies and metadata.
+Open `package.xml`.
+
+First, update the metadata in these three existing tags:
 ```xml
   <description>Examples of minimal publisher/subscriber using rclpy</description>
   <maintainer email="you@email.com">Your Name</maintainer>
   <license>Apache-2.0</license>
+```
 
+Then add the following lines inside the `<package>` tag to declare dependencies and metadata.
+```xml
   <exec_depend>rclpy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
 ```
+
+Save and exit `nano`.
 
 #### b. Edit `setup.py`
 Open `setup.py` and add the entry points for your nodes inside the `entry_points` dictionary.
@@ -385,12 +411,13 @@ source install/setup.bash
 ros2 run py_pubsub listener
 ```
 You will see `I heard: "Hello World: ..."` messages.
+Please take a screenshot of both terminals side by side for your submission.
 
 Press `Ctrl+C` in each terminal to stop the nodes.
 
 ### (Optional) 6. Monitor the actions under the hood
 
-You could also use ROS 2 CLI tools to inspect what is going on during this interaction. Keep the two existing terminal and open a third terminal:
+You could also use ROS 2 CLI tools to inspect what is going on during this interaction. Keep the two existing terminals and open a third terminal:
 
 - `ros2 topic echo /topic` will show you the messages being published in real-time, just like the subscriber node does.
 
@@ -400,4 +427,4 @@ You could also use ROS 2 CLI tools to inspect what is going on during this inter
 
 - `ros2 node info /minimal_subscriber` will show you that it is subscribing to /topic.
 
-The publisher and subscriber pattern is the most fundamental communication method in ROS 2, it is the backbone of the communication system where sensors publish certain data and other nodes subscribe to it for processing and decision making. 
+The publisher and subscriber pattern is the most fundamental communication method in ROS 2; it is the backbone of the communication system where sensors publish certain data and other nodes subscribe to it for processing and decision making.

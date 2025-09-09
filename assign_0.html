@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Robotics Development Environment Setup</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }
+        .wrap { max-width: 980px; margin: 0 auto; }
+        header { display:flex; justify-content:space-between; align-items:flex-start; }
+        nav { margin: 12px 0; }
+        pre { background:#f6f8fa; padding:12px; overflow:auto; }
+        code { font-family: monospace; }
+        .small { color:#555; }
+        .note { background:#fff3cd; padding:8px; border-left:4px solid #ffd966; }
+        footer { margin-top:30px; border-top:1px solid #ddd; padding-top:12px; }
+        /* Prominent GitHub repository box */
+        .github { background: #f0f8ff; border-left: 6px solid #0366d6; padding: 14px; margin: 14px 0; font-size: 1.02rem; }
+        .github h3 { margin: 0 0 6px 0; font-size: 1.15rem; }
+        .github p { margin: 4px 0; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header>
+        <div>
+            <h1>Robotics Development Environment Setup</h1>
+            <div class="small">Guide for installing ROS 2 Jazzy and Gazebo Harmonic, plus workspace and tutorial</div>
+        </div>
+        <div class="small">Last updated: 2025</div>
+    </header>
+
+    <nav>
+        <a href="#intro">Introduction</a> |
+        <a href="#option1">Option 1 (Ubuntu)</a> |
+        <a href="#option2">Option 2 (Docker)</a> |
+        <a href="#option3">Option 3 (GCP)</a> |
+        <a href="#part1">Workspace</a> |
+        <a href="#part2">Publisher-Subscriber</a>
+    </nav>
+
+    <aside class="github" role="complementary">
+        <h3>Project GitHub Repository — latest code & examples</h3>
+        <p>See the <a href="https://github.com/storks-amsterdam/vu-robotics-ros2" target="_blank" rel="noopener noreferrer">GitHub Repository</a> for the full instructions, up-to-date source code, extended explanations, and additional code examples.</p>
+        <p><strong>Included on the repo:</strong> complete setup scripts, Franka workspace code, detailed step-by-step guides, and runnable examples you can copy or clone.</p>
+    </aside>
+
+    <article>
+        <section id="intro">
+            <h2>Introduction to ROS 2 and Gazebo</h2>
+            <p><strong>ROS 2</strong> is a flexible framework for writing robot software. It is a collection of tools, libraries, and conventions that aim to simplify the task of creating complex and robust robot behavior across a wide variety of robotic platforms. ROS 2 is the second generation of ROS, and it is widely used in both academia and industry for robotics research and development. It provides a message-passing interface that allows different parts of a robot's software to communicate with each other.</p>
+            <p><strong>Gazebo</strong> is a powerful 3D robotics simulator that allows you to test and validate your robot's software in a virtual environment before deploying it on a physical robot. It provides realistic physics simulation, a variety of sensors, and a graphical interface to visualize your robot and its environment.</p>
+            <p class="note"><strong>Why ROS 2 Jazzy and Gazebo Harmonic?</strong> ROS 2 and Gazebo releases are tightly coupled with specific versions of Ubuntu. We will be using ROS 2 Jazzy Jellyfish and Gazebo Harmonic, which are the recommended versions for Ubuntu 24.04. This ensures compatibility with Ubuntu 24.04 and access to the latest features and bug fixes.</p>
+        </section>
+
+        <section id="option1">
+            <h2>Option 1: Native Ubuntu 24.04 Installation</h2>
+            <p>This is the recommended approach if you have a computer running Ubuntu 24.04 with sufficient resources (recommended: 4-core/8-thread CPU, 16GB RAM). The current setup is only supported for the bash shell.</p>
+
+            <h3>Install ROS 2</h3>
+            <p>Follow the official ROS 2 Jazzy installation guide:</p>
+            <p><a href="https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html" target="_blank" rel="noopener noreferrer">https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html</a></p>
+            <pre><code># 1. Set Locale
+sudo apt update && sudo apt install locales
+sudo locale-gen en_US en_US.UTF-8
+sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
+
+locale  # verify settings
+
+# 2. Add the ROS 2 APT repository
+sudo apt install software-properties-common
+sudo add-apt-repository universe
+sudo apt update && sudo apt install curl -y
+export ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F\" '{print $4}')
+curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo $VERSION_CODENAME)_all.deb" # If using Ubuntu derivatives use $UBUNTU_CODENAME
+sudo dpkg -i /tmp/ros2-apt-source.deb
+
+# 3. Install ROS 2 packages
+sudo apt update
+sudo apt install ros-jazzy-desktop # Includes GUI tools and simulators
+
+# 4. Source the setup script
+echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+source ~/.bashrc # Automatically configure the ROS 2 environment for every new terminal</code></pre>
+
+            <h3>Install Gazebo</h3>
+            <pre><code>sudo apt-get install ros-jazzy-ros-gz</code></pre>
+            <p>Make sure you have sourced the ROS 2 setup script following the previous instruction. You can also install the standalone binary version of Gazebo if preferred; see: <a href="https://gazebosim.org/docs/latest/ros_installation/" target="_blank" rel="noopener noreferrer">Official Gazebo with ROS installation guide</a>.</p>
+
+            <h3>Install Franka ROS2 Workspace</h3>
+            <p>To install the Franka workspace, follow the installation instructions from the <code>franka_ros2</code> repository:</p>
+            <p><a href="https://github.com/frankarobotics/franka_ros2" target="_blank" rel="noopener noreferrer">https://github.com/frankarobotics/franka_ros2</a></p>
+            <p>Alternatively, you can use the provided scripts to automate the installation of ROS2 and dependencies and the Franka ROS2 packages. Make sure to review the scripts before running them.</p>
+            <pre><code>chmod +x ros2_setup.sh
+./ros2_setup.sh
+
+chmod +x franka_setup.sh
+./franka_setup.sh</code></pre>
+        </section>
+
+        <section id="option2">
+            <h2>Option 2: Docker for macOS, Windows Subsystem for Linux (WSL), and other Linux distributions</h2>
+            <p>If you are using macOS, WSL, or a non-Ubuntu Linux distribution, you can use a pre-configured Docker container. This method requires a powerful workstation; otherwise the simulation will be laggy.</p>
+
+            <h3>What is Docker?</h3>
+            <p>Docker is a platform that allows you to run applications in isolated environments called containers. We use it to provide a consistent and pre-configured development environment with all the necessary tools, without affecting your own computer's system. For AI and Computer Science students, learning to use Docker is a very valuable skill.</p>
+
+            <h3>Install Docker</h3>
+            <ul>
+                <li>macOS: <a href="https://docs.docker.com/desktop/setup/install/mac-install/" target="_blank" rel="noopener noreferrer">https://docs.docker.com/desktop/setup/install/mac-install/</a></li>
+                <li>Windows: <a href="https://docs.docker.com/desktop/setup/install/windows-install/" target="_blank" rel="noopener noreferrer">https://docs.docker.com/desktop/setup/install/windows-install/</a></li>
+                <li>Linux: <a href="https://docs.docker.com/engine/install/" target="_blank" rel="noopener noreferrer">https://docs.docker.com/engine/install/</a></li>
+            </ul>
+
+            <h3>Run the docker container</h3>
+            <h4>Clean up old images (optional)</h4>
+            <p>If you have previously run the Docker container, it is recommended to remove any existing images of <code>storkslab/ros2-jazzy-franka</code> to avoid conflicts with previous versions:</p>
+            <pre><code>docker rmi storkslab/ros2-jazzy-franka --force</code></pre>
+            or
+            <pre><code>docker image pull storkslab/ros2-jazzy-franka:latest</code></pre>
+            then run:
+            <pre><code>docker run --rm -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server</code></pre>
+            <p>This command will download the Docker image and start a container that removes itself on shutdown (<code>--rm</code>). Any modifications to the container's filesystem outside of the persisted volume will be lost when the container is removed. The container runs a Jupyter Lab instance with a VNC server, giving you access to a full desktop environment.</p>
+            <pre><code># Detached mode
+docker run -d -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server</code></pre>
+            <p>You can use stop/start commands to manage the container. See the <a href="https://docs.docker.com/get-started/overview/" target="_blank" rel="noopener noreferrer">Docker documentation</a> for details.</p>
+
+            <h3>Access the environment</h3>
+            <ul>
+                <li>Open your web browser and navigate to <code>https://localhost:8888/lab</code>. It will ask for a password; the default is <code>robotics2025</code>.</li>
+                <li>Make sure you use <code>https</code> if the server was configured with TLS; otherwise use the appropriate protocol shown by the container logs.</li>
+                <li>You may see a security warning. Click "Advanced" and "Proceed anyway" if you trust the connection.</li>
+                <li>The Jupyter Lab interface will open. On the launcher, click on the "Desktop" icon to open the full desktop environment provided by the container.</li>
+            </ul>
+        </section>
+
+        <section id="option3">
+            <h2>Option 3: Google Cloud Platform (GCP) Virtual Machine</h2>
+            <p>If your computer is not powerful enough to run the simulation natively or via Docker, you can use a virtual machine on GCP and run Docker there.</p>
+
+            <h3>Step 1: Create a GCP Account &amp; Project</h3>
+            <ul>
+                <li>Sign up for a GCP account at <a href="https://cloud.google.com/" target="_blank" rel="noopener noreferrer">https://cloud.google.com/</a>.</li>
+                <li>If you have a <code>@student.vu.nl</code> email, you may be eligible for $300 in free credits.</li>
+                <li>Create a new project for this course, and enable billing.</li>
+            </ul>
+
+            <h3>Step 2: Create a Virtual Machine</h3>
+            <p>In the GCP Console, navigate to <strong>Compute Engine &gt; VM instances</strong> and click <strong>Create Instance</strong>. Configure the VM as follows:</p>
+            <ul>
+                <li><strong>Machine configuration</strong>: Name (e.g., <code>ros2-workbench</code>), Region (choose a nearby region), Series: C4, Machine type: <code>c4-highcpu-8</code> (8 vCPU, 16 GB memory).</li>
+                <li><strong>OS and Storage</strong>: Click Change &gt; Operating system: Container-Optimized OS (COS). Version: Container-Optimized OS 121-18867.199.52 LTS (x86/64). Boot disk type: Balanced Persistent Disk. Size: 50 GB.</li>
+                <li><strong>Networking</strong>: Check Allow HTTP traffic and Allow HTTPS traffic. Add network tag <code>jupyter-lab</code>.</li>
+            </ul>
+            <p>Click Create. The VM will be deployed in about a minute. Note its external IP.</p>
+
+            <h3>Step 3: Configure Firewall Rule</h3>
+            <p>Open the Cloud Shell and run:</p>
+            <pre><code>gcloud compute firewall-rules create allow-jupyter-lab-tcp-8888 \
+    --allow=tcp:8888 \
+    --source-ranges=0.0.0.0/0 \
+    --target-tags=jupyter-lab \
+    --description="Allow ingress TCP traffic on port 8888 for Jupyter Lab instances"</code></pre>
+
+            <h3>Step 4: Connect to the VM and Run Docker Container</h3>
+            <h4>Clean up old images (optional)</h4>
+            <p>If you have previously run the Docker container, it is recommended to remove any existing images of <code>storkslab/ros2-jazzy-franka</code> to avoid conflicts with previous versions:</p>
+            <pre><code>docker rmi storkslab/ros2-jazzy-franka --force</code></pre>
+            or
+            <pre><code>docker image pull storkslab/ros2-jazzy-franka:latest</code></pre>
+            <p>SSH into the VM and run the same Docker command as in Option 2:</p>
+            <pre><code>docker run --rm -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
+
+# Detached mode
+
+docker run -d -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server</code></pre>
+
+            <h3>Step 5: Access the Environment</h3>
+            <p>Open <code>https://&lt;your_vm_external_ip&gt;:8888/lab</code> in your browser, accept any security warning if needed, and enter password <code>robotics2025</code>.</p>
+
+            <h4>Important notes about use of VM</h4>
+            <ul>
+                <li><strong>Shutting down the VM:</strong> When you are done, shut down the VM from the GCP Console to avoid incurring costs. You can restart it later.</li>
+                <li><strong>Data persistence:</strong> The Docker volume <code>ros2_ws</code> is used to persist your work. Any files you create or modify in <code>/home/jovyan/ros2_ws</code> inside the container will be saved to the <code>ros2_ws</code> volume on the VM and will persist even after the container is stopped or removed. Keep your work inside this directory or another attached volume; modifications outside the volume will be lost when the container is removed.</li>
+                <li><strong>Costs:</strong> Running a VM incurs costs based on usage. Monitor your usage in the GCP Console to avoid unexpected charges.</li>
+                <li><strong>Scheduled shutdown:</strong> To avoid forgetting to shut down the VM, you can set up a scheduled shutdown using GCP's tools.</li>
+            </ul>
+        </section>
+
+        <section id="part1">
+            <h2>Part 1: Run a Test Program</h2>
+            <p>After setting up your environment, run a test program to visualize the Franka robot arm in Gazebo.</p>
+            <ol>
+                <li>If using a VM, open the desktop environment from the JupyterLab launcher.</li>
+                <li>Open a terminal.</li>
+                <li>Navigate to the Franka workspace and source the overlay:</li>
+            </ol>
+            <pre><code>cd ~/franka_ros2_ws
+source install/setup.bash</code></pre>
+            <p>Run the launch file:</p>
+            <pre><code>ros2 launch franka_gazebo_bringup visualize_franka_robot.launch.py</code></pre>
+            <p>You should see two windows open: RViz (visualizer) and Gazebo (simulator). Note that Gazebo may take a while to load the first time, and it could be obscured by other windows. Please take a screenshot of the result for your submission.</p>
+            <p>You can close all windows and stop the program by pressing <code>Ctrl+C</code> in the terminal.</p>
+        </section>
+
+        <section id="part2">
+            <h2>Part 2: ROS 2 Publisher-Subscriber Tutorial (Python)</h2>
+            <p>This tutorial, adapted from the official ROS 2 documentation, guides you through creating a simple publisher and subscriber showing the decoupled communication between a publisher and subscriber via topics managed by the ROS 2 middleware.</p>
+
+            <h3>About ROS 2 Workspaces (don't run this)</h3>
+            <p>A ROS2 workspace is somewhat similar to a virtual environment; it is a directory where you can work on the development of individual project packages, build, modify and install ROS 2 packages locally. You can have multiple workspaces but only one can be sourced at a time to make its packages available in your terminal environment. The building of different packages and their dependencies is handled by the build tool <code>colcon</code>.</p>
+
+            <h4>The workspace structure</h4>
+            <pre><code>your_workspace/            # The workspace root
+├── build/                 # (Generated by `colcon`) Contains intermediate build files
+├── install/               # (Generated by `colcon`) The installation directory. This is where the built packages are installed. It contains its own `setup.bash` script.
+├── log/                   # (Generated by `colcon`) Detailed build and test logs for each package.
+└── src/                   # **The only directory you create manually.**
+    └── your_package_1/    # Your custom packages or ones you've cloned from Git.
+    └── your_package_2/
+    └── ...</code></pre>
+
+            <h4>Sourcing</h4>
+            <p>Overlay a workspace on top of the core ROS 2 environment by running:</p>
+            <pre><code>source ~/your_workspace/install/setup.bash</code></pre>
+            <p>Source the custom setup file in every new terminal where you would like to use your packages but <strong>NEVER</strong> source multiple setup files directly into <code>~/.bashrc</code>.</p>
+
+            <h3>1. Create a Package</h3>
+            <p>Open a terminal and navigate to the <code>src</code> directory of a new workspace:</p>
+            <pre><code>mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws/src</code></pre>
+            <p>Create a new Python package:</p>
+            <pre><code>ros2 pkg create --build-type ament_python --license Apache-2.0 py_pubsub</code></pre>
+
+            <h3>2. Write the Publisher Node</h3>
+            <p>Navigate into the new package directory and create <code>publisher_member_function.py</code>:</p>
+            <pre><code>cd py_pubsub/py_pubsub
+nano publisher_member_function.py</code></pre>
+            <p>Copy the publisher code into the file:</p>
+            <pre><code>import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String
+
+class MinimalPublisher(Node):
+    def __init__(self):
+        super().__init__('minimal_publisher')
+        self.publisher_ = self.create_publisher(String, 'topic', 10)
+        timer_period = 0.5  # seconds
+        self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.i = 0
+
+    def timer_callback(self):
+        msg = String()
+        msg.data = 'Hello World: %d' % self.i
+        self.publisher_.publish(msg)
+        self.get_logger().info('Publishing: "%s"' % msg.data)
+        self.i += 1
+
+def main(args=None):
+    rclpy.init(args=args)
+    minimal_publisher = MinimalPublisher()
+    rclpy.spin(minimal_publisher)
+    minimal_publisher.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()</code></pre>
+
+            <h3>3. Write the Subscriber Node</h3>
+            <p>Navigate into the new package directory and create <code>subscriber_member_function.py</code>:</p>
+            <pre><code>cd py_pubsub/py_pubsub
+nano subscriber_member_function.py</code></pre>
+            <p>Copy the subscriber code into the file:</p>
+            <pre><code>import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String
+
+class MinimalSubscriber(Node):
+    def __init__(self):
+        super().__init__('minimal_subscriber')
+        self.subscription = self.create_subscription(
+            String,
+            'topic',
+            self.listener_callback,
+            10)
+        self.subscription  # prevent unused variable warning
+
+    def listener_callback(self, msg):
+        self.get_logger().info('I heard: "%s"' % msg.data)
+
+def main(args=None):
+    rclpy.init(args=args)
+    minimal_subscriber = MinimalSubscriber()
+    rclpy.spin(minimal_subscriber)
+    minimal_subscriber.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()</code></pre>
+
+            <h3>4. Configure the Package</h3>
+            <p>Edit <code>package.xml</code> to set metadata and add exec dependencies:</p>
+            <pre><code>&lt;description&gt;Examples of minimal publisher/subscriber using rclpy&lt;/description&gt;
+&lt;maintainer email="you@email.com"&gt;Your Name&lt;/maintainer&gt;
+&lt;license&gt;Apache-2.0&lt;/license&gt;
+
+&lt;exec_depend&gt;rclpy&lt;/exec_depend&gt;
+&lt;exec_depend&gt;std_msgs&lt;/exec_depend&gt;</code></pre>
+            <p>Edit <code>setup.py</code> to add console script entry points for the nodes. Example entry_points to add inside <code>setup()</code>:</p>
+            <pre><code># ... inside setup()
+    entry_points={
+        'console_scripts': [
+            'talker = py_pubsub.publisher_member_function:main',
+            'listener = py_pubsub.subscriber_member_function:main',
+        ],
+    },
+# ...</code></pre>
+
+            <h3>5. Build and Run</h3>
+            <pre><code>cd ~/ros2_ws
+colcon build --packages-select py_pubsub</code></pre>
+            <p>Run the publisher in one terminal (source the workspace first):</p>
+            <pre><code>cd ~/ros2_ws
+source install/setup.bash
+ros2 run py_pubsub talker</code></pre>
+            <p>Run the subscriber in another terminal:</p>
+            <pre><code>cd ~/ros2_ws
+source install/setup.bash
+ros2 run py_pubsub listener</code></pre>
+            <p>Press <code>Ctrl+C</code> in each terminal to stop the nodes.</p>
+
+            <h3>Optional: Monitor with ROS 2 CLI</h3>
+            <ul>
+                <li><code>ros2 topic echo /topic</code> &mdash; show messages in real time</li>
+                <li><code>ros2 node list</code> &mdash; show active nodes</li>
+                <li><code>ros2 node info /minimal_publisher</code> &mdash; show publisher info</li>
+            </ul>
+            <p>The publisher/subscriber pattern is fundamental to ROS 2: sensors publish data and other nodes subscribe to it for processing and decisions.</p>
+        </section>
+
+        <footer>
+            <p>Generated from README.md &mdash; converted to HTML for easier reading.</p>
+            <h3><strong>Submission Instructions</strong></h3>
+            <p><strong>To successfully complete this assignment please upload a pdf document with the following content:</strong></p>
+            <p><strong>- Your Names + Student number<br />- A screenshot of the results of Part 1 and Part 2 to proof your set up your environment</strong></p>
+        </footer>
+    </article>
+</div>
+</body>
+</html>
