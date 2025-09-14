@@ -190,6 +190,16 @@ RUN git clone -b jazzy https://github.com/frankarobotics/franka_ros2.git src && 
     colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 RUN echo "source ${HOME}/franka_ros2_ws/install/setup.bash" >> ${HOME}/.bashrc
 
+# Add position controllers and joint trajectory controller dependencies
+USER root
+RUN apt install ros-jazzy-ros2-control ros-jazzy-ros2-controllers -y
+
+USER ${NB_USER}
+COPY franka_gazebo_bringup ${HOME}/franka_ros2_ws/src/franka_gazebo/franka_gazebo_bringup
+WORKDIR ${HOME}/franka_ros2_ws
+RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
+    colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+
 # Change shell to bash for the user
 USER root
 RUN chsh -s /bin/bash ${NB_USER}
