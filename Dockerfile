@@ -195,7 +195,7 @@ USER root
 RUN apt install ros-jazzy-ros2-control ros-jazzy-ros2-controllers -y
 
 USER ${NB_USER}
-COPY franka_gazebo_bringup ${HOME}/franka_ros2_ws/src/franka_gazebo/franka_gazebo_bringup
+COPY --chown=${NB_UID}:${NB_GID} franka_gazebo_bringup ${HOME}/franka_ros2_ws/src/franka_gazebo/franka_gazebo_bringup
 WORKDIR ${HOME}/franka_ros2_ws
 RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
     colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release

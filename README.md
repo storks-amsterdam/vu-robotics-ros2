@@ -91,28 +91,27 @@ Docker is a platform that allows you to run applications in isolated environment
     -   **Linux:** [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/)
 
 2. **Clean up old images (if any):**
-   If you have previously run the Docker container, it is recommended to remove any existing images of `storkslab/ros2-jazzy-franka` to avoid conflicts with previous versions. You can do this by executing the following command in your terminal:
+   If you have previously run the Docker container, it is recommended to remove any existing images of `storkslab/ros2-jazzy-franka` to avoid conflicts with previous versions:
    ```bash
-    docker rmi storkslab/ros2-jazzy-franka --force
-    # or
-    docker image pull storkslab/ros2-jazzy-franka:latest
+   docker rmi storkslab/ros2-jazzy-franka --force   # optional cleanup
+   docker pull storkslab/ros2-jazzy-franka:latest   # pull latest image
    ```
 
 3.  **Run the docker container:**
-    Open a terminal and run the following command. If you are not familiar with the terminal, it is a good idea to refresh your bash/terminal skills.
-    ```bash
-    docker run --rm -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
-    ```
-    This command will download the Docker image and start a container that removes itself on shutdown (`--rm`). Any modifications to the container's filesystem outside of the persisted volume will be lost when the container is removed. The container runs a Jupyter Lab instance with a VNC server, giving you access to a full desktop environment.
-    
-    To keep your progress, you can also run the container in detached mode by adding the `-d` flag:
-    ```bash
-    docker run -d -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
-    ```
-    and use stop/start commands to manage the container. You can find more information about managing Docker containers in the [Docker documentation](https://docs.docker.com/get-started/overview/).
+    Open a terminal and run one of the following:
+    - Ephemeral (auto-remove on exit):
+      ```bash
+      docker run --rm -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
+      ```
+    - Recommended (persistent workspace and easy management):
+      ```bash
+      docker run -d --name ros2lab -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
+      ```
+      This creates a named container (`ros2lab`).
+    You can find more information about managing Docker containers in the Docker documentation.
 
 4.  **Access the environment:**
-    -   Open your web browser and navigate to `https://localhost:8888/lab`. It will ask for a password, which is `robotics2025` by default.
+    -   Open your web browser and navigate to `https://localhost:8888/lab`. The default password is `robotics2025`.
     -   Make sure you use `https` if the server was configured with TLS; otherwise use the appropriate protocol shown by the container logs.
     -   You may see a security warning. Click "Advanced" and "Proceed anyway" if you trust the connection.
     -   The Jupyter Lab interface will open. On the launcher, click on the "Desktop" icon.
@@ -166,24 +165,14 @@ If your computer is not powerful enough to run the simulation natively or via Do
 -   Connect to your VM using SSH. You can click the **SSH** button next to your instance in the GCP Console.
 
 -   **Clean up old images (if any):**
-    If you have previously run the Docker container, it is recommended to remove any existing images of `storkslab/ros2-jazzy-franka` to avoid conflicts with previous versions. You can do this by executing the following command in your terminal:
     ```bash
-    docker rmi storkslab/ros2-jazzy-franka --force
-    # or
-    docker image pull storkslab/ros2-jazzy-franka:latest
+    docker rmi storkslab/ros2-jazzy-franka --force   # optional cleanup
+    docker pull storkslab/ros2-jazzy-franka:latest   # pull latest image
     ```
--   In the SSH terminal, run the following command to start the Docker container (same instruction as in Option 2):
+-   Start the Docker container (same as Option 2). For persistence and easy restart:
     ```bash
-    docker run --rm -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
+    docker run -d --name ros2lab -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
     ```
-    This command will download the Docker image and start a container that removes itself on shutdown (`--rm`). Any modifications to the container's filesystem outside of the persisted volume will be lost when the container is removed. The container runs a Jupyter Lab instance with a VNC server, giving you access to a full desktop environment.
-    
-    To keep your progress, you can also run the container in detached mode by adding the `-d` flag:
-    ```bash
-    docker run -d -p 8888:8888 storkslab/ros2-jazzy-franka:latest jupyter server
-    ```
-    and use stop/start commands to manage the container. You can find more information about managing Docker containers in the [Docker documentation](https://docs.docker.com/get-started/overview/).
-
 
 ### Step 5: Access the Environment
 -   In your local web browser, navigate to `https://<your_vm_external_ip>:8888/lab`.
@@ -194,9 +183,8 @@ Congrats! Your setup is complete!
 
 ### Important notes about use of VM.
 - **Shutting down the VM:** When you are done, shut down the VM from the GCP Console to avoid incurring costs. You can restart it later.
-- **Data persistence:** The Docker volume `ros2_ws` is used to persist your work. Any files you create or modify in `/home/jovyan/ros2_ws` inside the container will be saved to the `ros2_ws` volume on the VM, and will persist even after the container is stopped or removed. Best practice is to keep all your work inside this directory, or another attached volume, and to delete the container after use (`--rm`). Any modifications to the container's filesystem outside of this volume will be lost when the container is removed.
-- **Costs:** Running a VM incurs costs based on usage. You have 300 USD in free credits if you signed up with a student email. Monitor your usage in the GCP Console to avoid unexpected charges.
-- **Scheduled shutdown:** To avoid forgetting to shut down the VM, you can set up a scheduled shutdown using GCP's 
+- **Costs:** Running a VM incurs costs based on usage. If you signed up with a student email, you may have USD 300 in free credits. Monitor your usage in the GCP Console to avoid unexpected charges.
+- **Scheduled shutdown:** To avoid forgetting to shut down the VM, set up an instance schedule (Compute Engine > Instance schedules) or use a cron job that calls `gcloud compute instances stop`.
 
 ---
 
@@ -233,14 +221,14 @@ A ROS2 workspace is somewhat similar to a virtual environment; it is a directory
 
 After being built, a standard ROS 2 workspace normally has the following directory
 ```bash
-your_workspace/            # The workspace root
-├── build/                 # (Generated by `colcon`) Contains intermediate build files
-├── install/               # (Generated by `colcon`) The installation directory. This is where the built packages are installed. It contains its own `setup.bash` script.
-├── log/                   # (Generated by `colcon`) Detailed build and test logs for each package.
-└── src/                   # **The only directory you create manually.**
-    └── your_package_1/    # Your custom packages or ones you've cloned from Git.
+your_workspace/
+├── build/
+├── install/
+├── log/
+└── src/
+    └── your_package_1/
     └── your_package_2/
-    └── ...               
+    └── ...
 ```
 Notice that all your source code for your packages is contained in `src/` only; here you could either create new packages (see Part 3 for details) or clone existing packages from git but you should always build from the workspace root using colcon.
 
@@ -427,4 +415,4 @@ You could also use ROS 2 CLI tools to inspect what is going on during this inter
 
 - `ros2 node info /minimal_subscriber` will show you that it is subscribing to /topic.
 
-The publisher and subscriber pattern is the most fundamental communication method in ROS 2; it is the backbone of the communication system where sensors publish certain data and other nodes subscribe to it for processing and decision making.
+The publisher–subscriber pattern is a fundamental communication method in ROS 2. It underpins how sensors publish data and how other nodes subscribe for processing and decision making.
