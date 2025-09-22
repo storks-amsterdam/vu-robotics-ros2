@@ -101,6 +101,7 @@ You will create franka_joint_control with two Python nodes.
 
 A. Create package:
 ```bash
+mkdir -p ~/ros2_ws/src
 cd ~/ros2_ws/src
 ros2 pkg create --build-type ament_python --license Apache-2.0 franka_joint_control
 cd franka_joint_control
@@ -225,3 +226,5 @@ Compress into: practical1_\<studentid\>.zip
 - Task 1: Component descriptions & answers: 2pts
 - Task 2: keyboard_controller script: 1.5pts
 - Task 3: get_pose script: 1.5pts
+
+
